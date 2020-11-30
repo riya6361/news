@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "835753872269",
+    "firebase_url": "https://newzapp-c7a57.firebaseio.com",
+    "project_id": "newzapp-c7a57",
+    "storage_bucket": "newzapp-c7a57.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:835753872269:android:eaed3fce65027dbb498bc4",
+        "android_client_info": {
+          "package_name": "newzapp.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "835753872269-9o0c2sfpt69cumi6cujog0jgkdupiv2r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "newzapp.com",
+            "certificate_hash": "f935af7a88536ad393c55f8013193518e80086dd"
+          }
+        },
+        {
+          "client_id": "835753872269-8ikjidevtim4tmn4gpp8jhjkg70olgev.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDJSD7uKtxe5WvPOYISUku0uzPTfaEMgfk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "835753872269-8ikjidevtim4tmn4gpp8jhjkg70olgev.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
