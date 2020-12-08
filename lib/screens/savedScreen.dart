@@ -6,6 +6,7 @@ import 'package:newsapp/services/crud.dart';
 import 'package:newsapp/screens/webScreen.dart';
 
 import 'package:share/share.dart';
+
 class SavedScreen extends StatefulWidget {
   SavedScreen({Key key}) : super(key: key);
 
@@ -18,6 +19,19 @@ class _SavedScreenState extends State<SavedScreen> {
   Stream newsStreams;
   bool waiting = false;
   Widget newsList() {
+    _deleteArticle(var uid) {
+      print("came here");
+      
+    
+    CollectionReference ref = FirebaseFirestore.instance.collection('save');
+    ref
+        .doc(uid)
+        .delete()
+        .then((value) => print("success"))
+        .catchError((error) => print(error.toString()));
+  }
+    
+
     return Container(
         child: Column(
       children: <Widget>[
@@ -33,15 +47,133 @@ class _SavedScreenState extends State<SavedScreen> {
                     itemCount: snapshot.data.docs.length,
                     shrinkWrap: true,
                     itemBuilder: (context, index) {
-                      return NewsTile(
-                          urlToImg:
-                              snapshot.data.docs[index].data()['urlToImg'],
-                          description:
-                              snapshot.data.docs[index].data()['description'],
-                          title: snapshot.data.docs[index].data()['title'],
-                          source: snapshot.data.docs[index].data()['source'],
-                          url: snapshot.data.docs[index].data()['url'],
-                          content: snapshot.data.docs[index].data()['content']);
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => WebScreen(
+                                        data: snapshot.data.docs[index]
+                                            .data()['url'],
+                                      )));
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(1.0),
+                          child: Card(
+                            elevation: 1.25,
+                            child: Padding(
+                              padding: const EdgeInsets.all(5.0),
+                              child: Column(children: [
+                                Row(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                          snapshot.data.docs[index]
+                                              .data()['source'],
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              color: Colors.indigo[400],
+                                              fontSize: 15)),
+                                    )
+                                  ],
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              Text(
+                                                  (snapshot.data.docs[index]
+                                                                  .data()[
+                                                              'title'] ==
+                                                          null)
+                                                      ? "Loading..."
+                                                      : snapshot
+                                                          .data.docs[index]
+                                                          .data()['title'],
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold)),
+                                              Padding(
+                                                padding:
+                                                    const EdgeInsets.all(7.0),
+                                                child: Text(
+                                                  (snapshot.data.docs[index]
+                                                                  .data()[
+                                                              'description'] ==
+                                                          null)
+                                                      ? "Loading..."
+                                                      : snapshot
+                                                              .data.docs[index]
+                                                              .data()[
+                                                          'description'],
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w500,
+                                                      color: Colors.grey),
+                                                ),
+                                              )
+                                            ]),
+                                      ),
+                                      Column(children: [
+                                        SizedBox(
+                                            height: 100,
+                                            width: 100,
+                                            child: CachedNetworkImage(
+                                              imageUrl: snapshot
+                                                  .data.docs[index]
+                                                  .data()['urlToImg'],
+                                              placeholder: (context, url) =>
+                                                  CircularProgressIndicator(),
+                                              errorWidget:
+                                                  (context, url, error) =>
+                                                      Icon(Icons.error),
+                                              fit: BoxFit.cover,
+                                            )),
+                                        Padding(
+                                          padding:
+                                              const EdgeInsets.only(top: 8.0),
+                                          child: Row(children: [
+                                            IconButton(
+                                              icon: Icon(Icons.share),
+                                              onPressed: () async {
+                                                Share.share(
+                                                    snapshot.data.docs[index]
+                                                        .data()['url'],
+                                                    subject:
+                                                        'Be updated with the latest news!!');
+                                              },
+                                            ),
+                                            SizedBox(height: 8),
+                                            IconButton(
+                                              icon: Icon(Icons.delete_sweep),
+                                              onPressed: () {
+                                                _deleteArticle(
+                                                  snapshot.data.docs[index]
+                                                      .data()['uid'],
+                                                      
+                                                );
+                                                setState(() {
+                                                  newsList();
+                                                });
+                                              },
+                                            )
+                                          ]),
+                                        )
+                                      ])
+                                    ],
+                                  ),
+                                ),
+                              ]),
+                            ),
+                          ),
+                        ),
+                      );
                     },
                   ),
                 );
@@ -58,133 +190,12 @@ class _SavedScreenState extends State<SavedScreen> {
     crudMethods.getNewzzz().then((result) {
       newsStreams = result;
     });
-    newsList();
-   
+
     super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(body: newsList());
-  }
-}
-
-class NewsTile extends StatefulWidget {
-  final String urlToImg, description, title, source, url, content;
-  NewsTile(
-      {@required this.urlToImg,
-      @required this.description,
-      @required this.title,
-      @required this.source,
-      @required this.url,
-      @required this.content});
-
-  @override
-  _NewsTileState createState() => _NewsTileState();
-}
-
-class _NewsTileState extends State<NewsTile> {
-  CrudMethods _crudMethods = CrudMethods();
-
-  _deleteArticle() {
-    print("came here");
-    FirebaseFirestore.instance
-        .collection("save")
-        .snapshots()
-        .listen((snapshot) {
-      snapshot.docs.forEach((doc) {
-          if(widget.title == doc.data()['title']) {
-            _crudMethods.deleteArticle(doc.id);
-            print('Deleted');
-          }
-      });
-    });
-  }
-  
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(context,
-            MaterialPageRoute(builder: (context) => WebScreen(data: widget.url)));
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(1.0),
-        child: Card(
-          elevation: 1.25,
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
-            child: Column(children: [
-              Row(
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(widget.source,
-                        style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.indigo[400],
-                            fontSize: 15)),
-                  )
-                ],
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text((widget.title == null) ? "Loading..." : widget.title,
-                                style: TextStyle(fontWeight: FontWeight.bold)),
-                            Padding(
-                              padding: const EdgeInsets.all(7.0),
-                              child: Text(
-                                (widget.description == null)
-                                    ? "Loading..."
-                                    : widget.description,
-                                style: TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.grey),
-                              ),
-                            )
-                          ]),
-                    ),
-                    Column(children: [
-                      SizedBox(
-                          height: 100,
-                          width: 100,
-                          child: CachedNetworkImage(
-                            imageUrl: widget.urlToImg,
-                            placeholder: (context, url) =>
-                                CircularProgressIndicator(),
-                            errorWidget: (context, url, error) =>
-                                Icon(Icons.error),
-                            fit: BoxFit.cover,
-                          )),
-                      Padding(
-                        padding: const EdgeInsets.only(top: 8.0),
-                        child: Row(children: [
-                          IconButton(
-                            icon: Icon(Icons.share),
-                            onPressed: () async {
-                              Share.share(widget.url,
-                                  subject: 'Be updated with the latest news!!');
-                            },
-                          ),
-                          SizedBox(height : 8),
-                          IconButton(icon:Icon(Icons.delete_sweep),onPressed:(){ _deleteArticle();},)
-                        ]),
-                      )
-                    ])
-                  ],
-                ),
-              ),
-            ]),
-          ),
-        ),
-      ),
-    );
   }
 }

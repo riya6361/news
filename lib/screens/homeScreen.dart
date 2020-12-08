@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:newsapp/Blocks/news.dart';
 import 'package:newsapp/screens/webScreen.dart';
 import 'package:newsapp/services/crud.dart';
+import 'package:random_string/random_string.dart';
 import 'package:timeago/timeago.dart' as timeago;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share/share.dart';
@@ -44,21 +45,20 @@ class _HomeScreenState extends State<HomeScreen> {
 List x=[];
     FirebaseFirestore.instance
         .collection("save")
-        .snapshots()
-        .listen((snapshot) {
-      snapshot.docs.forEach((doc) {
-        if(!x.contains(doc.data()['title'])){
-        print(doc.data()['title']);
-        x.add(doc.data()['title']);
-        print(x);
-        }
+        .where("uid").get().then((snapshot){
+           snapshot.docs.forEach((element) {
+             print(element["title"]);
+             setState(() {
+                x.add(element["title"]);
+             });
+      
       });
-    });
-   
+        });
+  
     setState(() {
      saved=x;
     });
-   print(saved);
+  
   }
 
   
@@ -253,16 +253,21 @@ List x=[];
   }
 
   _saveNews() async {
+     CollectionReference ref = FirebaseFirestore.instance.collection('save');
+    var temp = "";
+    temp = "${randomAlphaNumeric(9)}";
+    print(temp);
+    ref.doc(temp).set({
     
-    Map<String, dynamic> newsMap = {
+      "uid":temp,
       "title": title,
       "description": description,
       "urlToImg": urlToImg,
       "content": content,
       "url": url,
       "source": source
-    };
-    crudMethods.addNews(newsMap).then((result) {
+    })
+   .then((result) {
       final snackBar = SnackBar(
         content: Row(
           children: [
