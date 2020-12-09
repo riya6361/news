@@ -21,16 +21,9 @@ class _SavedScreenState extends State<SavedScreen> {
   Widget newsList() {
     _deleteArticle(var uid) {
       print("came here");
-      
-    
-    CollectionReference ref = FirebaseFirestore.instance.collection('save');
-    ref
-        .doc(uid)
-        .delete()
-        .then((value) => print("success"))
-        .catchError((error) => print(error.toString()));
-  }
-    
+
+      crudMethods.deleteArticle(uid);
+    }
 
     return Container(
         child: Column(
@@ -156,7 +149,6 @@ class _SavedScreenState extends State<SavedScreen> {
                                                 _deleteArticle(
                                                   snapshot.data.docs[index]
                                                       .data()['uid'],
-                                                      
                                                 );
                                                 setState(() {
                                                   newsList();

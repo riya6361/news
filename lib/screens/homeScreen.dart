@@ -8,7 +8,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:share/share.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-
 class HomeScreen extends StatefulWidget {
   HomeScreen({Key key}) : super(key: key);
 
@@ -27,7 +26,7 @@ class _HomeScreenState extends State<HomeScreen> {
   String content;
   String url;
   String source;
-  List saved=[];
+  List saved = [];
   @override
   void initState() {
     super.initState();
@@ -42,26 +41,23 @@ class _HomeScreenState extends State<HomeScreen> {
   // }
 
   getSaved() {
-List x=[];
+    List x = [];
     FirebaseFirestore.instance
         .collection("save")
-        .where("uid").get().then((snapshot){
-           snapshot.docs.forEach((element) {
-             print(element["title"]);
-             setState(() {
-                x.add(element["title"]);
-             });
-      
-      });
-        });
-  
-    setState(() {
-     saved=x;
-    });
-  
-  }
+        .where("uid")
+        .get()
+        .then((snapshot) {
+      snapshot.docs.forEach((element) {
+        print(element["title"]);
 
-  
+        x.add(element["title"]);
+      });
+    });
+
+    setState(() {
+      saved = x;
+    });
+  }
 
   getNews() async {
     News newsInstance = News();
@@ -208,12 +204,13 @@ List x=[];
                                                     : articles[index]
                                                         .description;
                                               });
-                                              (saved.contains(articles[index].title))?_showSnackBar():
-                                                  _saveNews();
+                                              (saved.contains(
+                                                      articles[index].title))
+                                                  ? _showSnackBar()
+                                                  : _saveNews();
 
-                                            
                                               saved.add(articles[index].title);
-                                             // print(saved);
+                                              // print(saved);
                                             },
                                             icon: saved.contains(
                                                     articles[index].title)
@@ -221,7 +218,6 @@ List x=[];
                                                 : Icon(Icons
                                                     .bookmark_outline_outlined),
                                             iconSize: 35.0,
-                                            
                                           )),
                                     ])
                                   ])
@@ -236,7 +232,6 @@ List x=[];
                 }));
   }
 
-  
   _showSnackBar() {
     final snackBar = SnackBar(
       content: Row(
@@ -253,21 +248,9 @@ List x=[];
   }
 
   _saveNews() async {
-     CollectionReference ref = FirebaseFirestore.instance.collection('save');
-    var temp = "";
-    temp = "${randomAlphaNumeric(9)}";
-    print(temp);
-    ref.doc(temp).set({
-    
-      "uid":temp,
-      "title": title,
-      "description": description,
-      "urlToImg": urlToImg,
-      "content": content,
-      "url": url,
-      "source": source
-    })
-   .then((result) {
+    crudMethods
+        .addNews(title, description, content, urlToImg, url, source)
+        .then((result) {
       final snackBar = SnackBar(
         content: Row(
           children: [
